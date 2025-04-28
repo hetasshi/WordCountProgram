@@ -1,38 +1,124 @@
 # TextAnalyzer.cs - объяснялка на случай если забуду. Памятка
 
-| Показатель | Где считается | Алгоритм / формула | Ключевой фрагмент кода |
-|------------|---------------|--------------------|-------------------------|
-| **`TotalWords`** | `CalculateWordStats` | 1. Разбиваем текст на список `words` (см. `ExtractWords`).<br>2. `TotalWords = words.Count;` | ```csharp\nTotalWords = words.Count;\n``` |
-| **`TotalSentences`** | `CalculateSentenceStats` | 1. Делим текст на `sentences` по точке `.` / `!` / `?` (см. `ExtractSentences`).<br>2. `TotalSentences = sentences.Count;` | ```csharp\nTotalSentences = sentences.Count;\n``` |
-| **`TotalSpaces`** | `CalculateCharStats` | Проходим каждый символ исходного `text`.<br> Если `c == ' '`, инкрементируем счётчик. | ```csharp\nif (c == ' ') TotalSpaces++;\n``` |
-| **`TextSizeBytes`** | `Analyze` (самый верх метода) | Сразу после сброса: `Encoding.UTF8.GetByteCount(text)` — сколько байтов в UTF-8. | ```csharp\nTextSizeBytes = Encoding.UTF8.GetByteCount(text);\n``` |
-| **`AvgWordLength`** | `CalculateWordStats` | Суммируем длины всех слов → делим на `TotalWords`, округляем до 1 знака. | ```csharp\nAvgWordLength = Math.Round((double)charSum / TotalWords, 1);\n``` |
-| **`AvgSentenceLength`** | `CalculateWordStats` (после подсчёта слов) | Если есть хотя бы одно предложение: `TotalWords / TotalSentences`, округление до 1. | ```csharp\nif (TotalSentences > 0)\n    AvgSentenceLength = Math.Round((double)TotalWords / TotalSentences, 1);\n``` |
-| **`WordFrequency`** (`_wordFreq`) | `CalculateWordStats` | Для каждого слова: берём текущее значение (0, если нет) и +1. | ```csharp\nint cur; _wordFreq.TryGetValue(word, out cur);\n_wordFreq[word] = cur + 1;\n``` |
-| **`CharFrequency`** (`_charFreq`) | `CalculateCharStats` | Для каждого символа исходного текста — аналогично словарю слов. | ```csharp\nint cur; _charFreq.TryGetValue(c, out cur);\n_charFreq[c] = cur + 1;\n``` |
+## Большая памятка по `TextAnalyzer.cs`  
+*(на уровне «дотошных» вопросов)*  
 
-### Визуальная схема вызовов
+---
 
+### 0. Общая идея
+
+1. **Обнуляем** всё старое (`Reset`).  
+2. **Сразу** выясняем, сколько байт занимает текст в UTF-8.  
+3. Делим текст **дважды**:  
+   * на **предложения** → знаем `TotalSentences`;  
+   * на **слова** → знаем `TotalWords`, среднюю длину слова, словарь частот.  
+4. Один проход по всем **символам** → считаем пробелы и словарь частот символов.  
+5. Из уже готовых `TotalWords` и `TotalSentences` выводим среднюю длину предложения.  
+
+> **Почему порядок именно такой?**  
+> Средняя длина предложения = (*сколько слов*) / (*сколько предложений*).  
+> Поэтому слова считаем *до* окончательного расчёта предложений.
+
+---
+
+### 1. Как именно режем текст
+
+#### 1.1 `ExtractSentences(string text)`
+
+```csharp
+string[] parts = Regex.Split(text, "(?<=[.!?])",
+                             RegexOptions.Multiline);
 ```
-Analyze(text)
- ├─ Reset()                     // все нули, словари очистить
- ├─ TextSizeBytes = UTF8(text)
- ├─ sentences = ExtractSentences(text)
- │   └─ TotalSentences
- ├─ words = ExtractWords(text)
- │   ├─ TotalWords
- │   ├─ AvgWordLength
- │   ├─ WordFrequency[…]
- │   └─ AvgSentenceLength = TotalWords / TotalSentences
- └─ foreach char in text
-     ├─ TotalSpaces (если ' ')
-     └─ CharFrequency[…]
+
+| Часть | Что означает |
+|-------|--------------|
+| `Regex.Split` | Делит строку, **оставляя** разделители (в отличие от `string.Split`, где они «хлоп» — и пропали). |
+| `(?<= … )` | **Позитивный look-behind**: «найди место, где **перед** курсором стоит…». В нашем случае — точка, восклицательный или вопросительный знак. |
+| `[.!?]` | Символ-множество: «точка **или** восклиц **или** вопрос». |
+| Результат | Массив кусков. Пример: «Привет! Как…?» →<br>`["Привет!", " ", "Как…?"]`. Далее `Trim()` удаляет пробелы вокруг, а пустые строки отсекаются. |
+
+> **Почему не `Split(@\"[.!?]\")`?**  
+> Тогда разделители исчезнут, и мы потеряем, где заканчивалось предложение.
+
+---
+
+#### 1.2 `ExtractWords(string text)`
+
+```csharp
+const string pattern = "[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{Pd}]*";
 ```
 
-### Главное про каждую «кучку» кода
+| Часть регэкспа | Что ловит |
+|----------------|----------|
+| `\\p{L}` | **L**etter: любая буква любого алфавита (русский, латиница, иероглиф). |
+| `\\p{N}` | **N**umber: любая цифра Unicode (0-9, китайские 数字 и т. д.). |
+| `\\p{Pd}` | **P**unctuation, dash: любой «дефис-подобный» символ (- — – ...). |
+| `[\\p{L}\\p{N}]` | ***Первый*** символ слова: буква **или** цифра. |
+| `[\\p{L}\\p{N}\\p{Pd}]*` | ***Продолжение***: буквы, цифры, дефисы, сколько угодно. |
+| Итог | «e-mail», «дом-работа» считаются **одним** словом; «2025» — тоже словом. Знаки препинания с краёв (`,` `;` `\"`) не входят. |
 
-* **ExtractSentences** — `Regex.Split` по шаблону `(?<=[.!?])` и `Trim()`, поэтому точки остаются в самом предложении, а пустые строки не попадают.
-* **ExtractWords** — Unicode-регекс `[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{Pd}]*` — букв/цифр + дефисы внутри слова.
-* **Reset / Clear** — обнуляет всё, чтобы новый запуск анализа не «прихватил» старые данные.
-* **Словари** хранятся в `Dictionary`-ах для быстрого подсчёта топ-10.
+*`Regex.Matches` + `.Cast<Match>().Select(m => m.Value)` → получаем `List<string> words`.*
 
+---
+
+### 2. Как считаются все поля
+
+| Поле | Где ставится значение | Подробности реализации |
+|------|-----------------------|------------------------|
+| **`TotalWords`** | `TotalWords = words.Count;` | `words` — результат `ExtractWords`. |
+| **`TotalSentences`** | `TotalSentences = sentences.Count;` | `sentences` — результат `ExtractSentences`. |
+| **`TotalSpaces`** | В `CalculateCharStats`:<br>`if (c == ' ') TotalSpaces++;` | Один проход по исходному `text`. |
+| **`TextSizeBytes`** | Сразу в `Analyze`:<br>`Encoding.UTF8.GetByteCount(text)` | UTF-8 учитывает любой символ, поэтому размер честный. |
+| **`AvgWordLength`** | Суммируем все `word.Length`, делим на `TotalWords`, округляем: `Math.Round(…,1)` | Почему `double` — чтобы было «4,7». |
+| **`AvgSentenceLength`** | Если `TotalSentences > 0` → `TotalWords / TotalSentences`, округляем | `if` нужен, чтобы не делить на 0, когда текст без `.!?`. |
+| **Словарь слов** | `_wordFreq[word] = cur + 1;` | `cur` = 0, если слово впервые. Задаёт базу для «топ-10 слов». |
+| **Словарь символов** | Аналогично, но для `char` | Позволяет потом отсортировать и вывести «топ-10 символов». |
+
+---
+
+### 3. Почему нужен `Reset()` и `Clear()`
+
+* `Reset()` обнуляет **числа** и **чищит** словари → чтобы повторный `Analyze` не складывался с предыдущим.  
+* `Clear()` (вызывается кнопкой «Очистить») просто вызывает `Reset()`.  
+  **Раньше** форма делала `Analyze(\" \")` и появлялся 1 пробел / 1 байт. Теперь бага нет.
+
+---
+
+### 4. Один взгляд на код блоками
+
+```csharp
+public void Analyze(string text)
+{
+    Guard text not empty → throw
+    Reset()                   // всё в ноль
+    TextSizeBytes = UTF8 bytes
+
+    sentences = ExtractSentences(text)    //  . ! ?  look-behind
+    TotalSentences = count
+
+    words = ExtractWords(text)            //  Unicode & дефисы
+    TotalWords = count
+    AvgWordLength = Σlen / TotalWords
+    WordFrequency …
+
+    AvgSentenceLength = TotalWords / TotalSentences (если >0)
+
+    foreach char c in text
+        if (c == ' ') ++TotalSpaces
+        CharFrequency[c]++
+
+    // Всё готово: свойства публично читаются формой
+}
+```
+
+---
+
+### 5. Вопросы, которые часто задают
+
+| Вопрос | Короткий ответ |
+|--------|----------------|
+| **Почему `Regex`?** | Стандартный `string.Split(' ')`/`IndexOf` не справится с Unicode-буквами, дефисами и т. д. |
+| **А если два пробела подряд?** | Каждый пробел считается отдельно, так что `TotalSpaces` точный. |
+| **Сокращения «т.е.» делят предложение?** | Да, пока делят: это оговорено в требованиях («на первом этапе допустимо»). |
+| **Можно ли заменить `Dictionary` на `ConcurrentDictionary`?** | Не нужно: всё происходит в одном потоке UI. |
+| **Почему округление до 1 знака?** | Снова было в требованиях; меняем `1` на `2` — и будет «4,73». |
