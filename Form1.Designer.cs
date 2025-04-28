@@ -20,6 +20,7 @@ namespace WordCountProgram
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.inputTextBox = new System.Windows.Forms.TextBox();
             this.analyzeButton = new System.Windows.Forms.Button();
             this.loadFileButton = new System.Windows.Forms.Button();
@@ -78,9 +79,9 @@ namespace WordCountProgram
             // 
             // statsGroupBox
             // 
-            this.statsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.statsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.statsGroupBox.Controls.Add(this.textSizeLabel);
             this.statsGroupBox.Controls.Add(this.avgSentenceLengthLabel);
             this.statsGroupBox.Controls.Add(this.avgWordLengthLabel);
@@ -96,88 +97,88 @@ namespace WordCountProgram
             this.statsGroupBox.TabStop = false;
             this.statsGroupBox.Text = "Статистика";
             // 
-            // totalWordsLabel
+            // textSizeLabel
             // 
-            this.totalWordsLabel.AutoSize = true;
-            this.totalWordsLabel.Location = new System.Drawing.Point(400, 25);
-            this.totalWordsLabel.Name = "totalWordsLabel";
-            this.totalWordsLabel.Size = new System.Drawing.Size(167, 13);
-            this.totalWordsLabel.TabIndex = 0;
-            this.totalWordsLabel.Text = "Общее количество слов: 0";
-            // 
-            // topWordsLabel
-            // 
-            this.topWordsLabel.AutoSize = false;
-            this.topWordsLabel.Location = new System.Drawing.Point(6, 25);
-            this.topWordsLabel.Name = "topWordsLabel";
-            this.topWordsLabel.Size = new System.Drawing.Size(350, 130);
-            this.topWordsLabel.TabIndex = 1;
-            this.topWordsLabel.Text = "Топ-10 слов:";
-            // 
-            // topCharsLabel
-            // 
-            this.topCharsLabel.AutoSize = false;
-            this.topCharsLabel.Location = new System.Drawing.Point(6, 165);
-            this.topCharsLabel.Name = "topCharsLabel";
-            this.topCharsLabel.Size = new System.Drawing.Size(350, 130);
-            this.topCharsLabel.TabIndex = 2;
-            this.topCharsLabel.Text = "Топ-10 символов:";
-            // 
-            // spacesLabel
-            // 
-            this.spacesLabel.AutoSize = true;
-            this.spacesLabel.Location = new System.Drawing.Point(400, 100);
-            this.spacesLabel.Name = "spacesLabel";
-            this.spacesLabel.Size = new System.Drawing.Size(71, 13);
-            this.spacesLabel.TabIndex = 3;
-            this.spacesLabel.Text = "Пробелов: 0";
-            // 
-            // sentencesLabel
-            // 
-            this.sentencesLabel.AutoSize = true;
-            this.sentencesLabel.Location = new System.Drawing.Point(400, 125);
-            this.sentencesLabel.Name = "sentencesLabel";
-            this.sentencesLabel.Size = new System.Drawing.Size(99, 13);
-            this.sentencesLabel.TabIndex = 4;
-            this.sentencesLabel.Text = "Предложений: 0";
-            // 
-            // avgWordLengthLabel
-            // 
-            this.avgWordLengthLabel.AutoSize = true;
-            this.avgWordLengthLabel.Location = new System.Drawing.Point(400, 150);
-            this.avgWordLengthLabel.Name = "avgWordLengthLabel";
-            this.avgWordLengthLabel.Size = new System.Drawing.Size(143, 13);
-            this.avgWordLengthLabel.TabIndex = 5;
-            this.avgWordLengthLabel.Text = "Средняя длина слова: 0";
+            this.textSizeLabel.AutoSize = true;
+            this.textSizeLabel.Location = new System.Drawing.Point(400, 200);
+            this.textSizeLabel.Name = "textSizeLabel";
+            this.textSizeLabel.Size = new System.Drawing.Size(121, 13);
+            this.textSizeLabel.TabIndex = 7;
+            this.textSizeLabel.Text = "Размер текста: 0 байт";
             // 
             // avgSentenceLengthLabel
             // 
             this.avgSentenceLengthLabel.AutoSize = true;
             this.avgSentenceLengthLabel.Location = new System.Drawing.Point(400, 175);
             this.avgSentenceLengthLabel.Name = "avgSentenceLengthLabel";
-            this.avgSentenceLengthLabel.Size = new System.Drawing.Size(197, 13);
+            this.avgSentenceLengthLabel.Size = new System.Drawing.Size(166, 13);
             this.avgSentenceLengthLabel.TabIndex = 6;
             this.avgSentenceLengthLabel.Text = "Средняя длина предложения: 0";
             // 
-            // textSizeLabel
+            // avgWordLengthLabel
             // 
-            this.textSizeLabel.AutoSize = true;
-            this.textSizeLabel.Location = new System.Drawing.Point(400, 200);
-            this.textSizeLabel.Name = "textSizeLabel";
-            this.textSizeLabel.Size = new System.Drawing.Size(122, 13);
-            this.textSizeLabel.TabIndex = 7;
-            this.textSizeLabel.Text = "Размер текста: 0 байт";
+            this.avgWordLengthLabel.AutoSize = true;
+            this.avgWordLengthLabel.Location = new System.Drawing.Point(400, 150);
+            this.avgWordLengthLabel.Name = "avgWordLengthLabel";
+            this.avgWordLengthLabel.Size = new System.Drawing.Size(128, 13);
+            this.avgWordLengthLabel.TabIndex = 5;
+            this.avgWordLengthLabel.Text = "Средняя длина слова: 0";
+            // 
+            // sentencesLabel
+            // 
+            this.sentencesLabel.AutoSize = true;
+            this.sentencesLabel.Location = new System.Drawing.Point(400, 125);
+            this.sentencesLabel.Name = "sentencesLabel";
+            this.sentencesLabel.Size = new System.Drawing.Size(89, 13);
+            this.sentencesLabel.TabIndex = 4;
+            this.sentencesLabel.Text = "Предложений: 0";
+            // 
+            // spacesLabel
+            // 
+            this.spacesLabel.AutoSize = true;
+            this.spacesLabel.Location = new System.Drawing.Point(400, 100);
+            this.spacesLabel.Name = "spacesLabel";
+            this.spacesLabel.Size = new System.Drawing.Size(69, 13);
+            this.spacesLabel.TabIndex = 3;
+            this.spacesLabel.Text = "Пробелов: 0";
+            // 
+            // topCharsLabel
+            // 
+            this.topCharsLabel.Location = new System.Drawing.Point(6, 165);
+            this.topCharsLabel.Name = "topCharsLabel";
+            this.topCharsLabel.Size = new System.Drawing.Size(350, 130);
+            this.topCharsLabel.TabIndex = 2;
+            this.topCharsLabel.Text = "Топ-10 символов:";
+            // 
+            // topWordsLabel
+            // 
+            this.topWordsLabel.Location = new System.Drawing.Point(6, 25);
+            this.topWordsLabel.Name = "topWordsLabel";
+            this.topWordsLabel.Size = new System.Drawing.Size(350, 130);
+            this.topWordsLabel.TabIndex = 1;
+            this.topWordsLabel.Text = "Топ-10 слов:";
+            // 
+            // totalWordsLabel
+            // 
+            this.totalWordsLabel.AutoSize = true;
+            this.totalWordsLabel.Location = new System.Drawing.Point(400, 25);
+            this.totalWordsLabel.Name = "totalWordsLabel";
+            this.totalWordsLabel.Size = new System.Drawing.Size(142, 13);
+            this.totalWordsLabel.TabIndex = 0;
+            this.totalWordsLabel.Text = "Общее количество слов: 0";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.Controls.Add(this.statsGroupBox);
             this.Controls.Add(this.clearButton);
             this.Controls.Add(this.loadFileButton);
             this.Controls.Add(this.analyzeButton);
             this.Controls.Add(this.inputTextBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(800, 600);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -186,6 +187,7 @@ namespace WordCountProgram
             this.statsGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion

@@ -7,7 +7,7 @@ namespace WordCountProgram.Logic
     /// <summary>Читает .txt ≤ 1 МБ и проверяет ограничения.</summary>
     public static class FileHandler
     {
-        private const int MaxSize = 1 * 1024 * 1024;   // 1 МБ
+        private const int MaxSize = 1 * 1024 * 1024;   // 1 МБ | 1 048 576 байт
 
         public static string LoadText(string path)
         {

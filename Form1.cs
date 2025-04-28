@@ -53,7 +53,7 @@ namespace WordCountProgram
         private void clearButton_Click(object sender, EventArgs e)
         {
             inputTextBox.Clear();
-            _analyzer.Clear();      // ← вместо Analyze(\" \")
+            _analyzer.Clear();
             UpdateStatsUI();
         }
 
