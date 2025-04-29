@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 namespace WordCountProgram.Logic
 {
     /// <summary>
-    /// Обрабатывает текст и выдаёт статистику (C# 7.3).
-    /// Добавлен публичный метод <see cref="Clear"/> для полного сброса.
+    /// Анализирует текст: считает слова, предложения, символы,
+    /// и нормализует символы в нижний регистр для подсчёта.
     /// </summary>
     public sealed class TextAnalyzer
     {
@@ -24,13 +24,10 @@ namespace WordCountProgram.Logic
         private readonly Dictionary<char, int> _charFreq =
             new Dictionary<char, int>();
 
-        public IReadOnlyDictionary<string, int> WordFrequency { get { return _wordFreq; } }
-        public IReadOnlyDictionary<char, int> CharFrequency { get { return _charFreq; } }
+        public IReadOnlyDictionary<string, int> WordFrequency => _wordFreq;
+        public IReadOnlyDictionary<char, int> CharFrequency => _charFreq;
 
-        /// <summary>
-        /// Выполнить анализ указанного текста.
-        /// </summary>
-        /// <param name="text">Текст (не пустой).</param>
+        /// <summary>Запускает анализ текста.</summary>
         public void Analyze(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -39,24 +36,18 @@ namespace WordCountProgram.Logic
             Reset();
             TextSizeBytes = Encoding.UTF8.GetByteCount(text);
 
-            List<string> sentences = ExtractSentences(text);
+            var sentences = ExtractSentences(text);
             CalculateSentenceStats(sentences);
 
-            List<string> words = ExtractWords(text);
+            var words = ExtractWords(text);
             CalculateWordStats(words);
 
             CalculateCharStats(text);
         }
 
-        /// <summary>
-        /// Полностью очищает все накопленные данные (используйте при очистке формы).
-        /// </summary>
-        public void Clear()
-        {
-            Reset();
-        }
+        /// <summary>Сбрасывает всю статистику.</summary>
+        public void Clear() => Reset();
 
-        // ─────────── Helpers ───────────
         private void Reset()
         {
             TotalWords = TotalSpaces = TotalSentences = 0;
@@ -68,12 +59,17 @@ namespace WordCountProgram.Logic
 
         private static List<string> ExtractSentences(string text)
         {
+            // Режем по . ! ? (look-behind сохраняет разделитель)
             string[] parts = Regex.Split(text, "(?<=[.!?])", RegexOptions.Multiline);
-            return parts.Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
+            return parts
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToList();
         }
 
         private static List<string> ExtractWords(string text)
         {
+            // Слово: буква/цифра + (буквы/цифры/дефисы)*
             const string pattern = "[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{Pd}]*";
             return Regex.Matches(text, pattern,
                                  RegexOptions.Multiline | RegexOptions.CultureInvariant)
@@ -83,23 +79,20 @@ namespace WordCountProgram.Logic
         }
 
         private void CalculateSentenceStats(IReadOnlyList<string> sentences)
-        {
-            TotalSentences = sentences.Count;
-        }
+            => TotalSentences = sentences.Count;
 
         private void CalculateWordStats(IReadOnlyList<string> words)
         {
             TotalWords = words.Count;
             if (TotalWords == 0) return;
 
-            int charSum = 0;
+            int sumLen = 0;
             foreach (string w in words)
             {
-                charSum += w.Length;
-                int cur; _wordFreq.TryGetValue(w, out cur);
-                _wordFreq[w] = cur + 1;
+                sumLen += w.Length;
+                _wordFreq[w] = _wordFreq.TryGetValue(w, out var cnt) ? cnt + 1 : 1;
             }
-            AvgWordLength = Math.Round((double)charSum / TotalWords, 1);
+            AvgWordLength = Math.Round((double)sumLen / TotalWords, 1);
 
             if (TotalSentences > 0)
                 AvgSentenceLength = Math.Round((double)TotalWords / TotalSentences, 1);
@@ -109,9 +102,12 @@ namespace WordCountProgram.Logic
         {
             foreach (char c in text)
             {
-                if (c == ' ') TotalSpaces++;
-                int cur; _charFreq.TryGetValue(c, out cur);
-                _charFreq[c] = cur + 1;
+                // приводим в нижний регистр
+                char lower = char.ToLowerInvariant(c);
+                if (lower == ' ')
+                    TotalSpaces++;
+
+                _charFreq[lower] = _charFreq.TryGetValue(lower, out var cnt) ? cnt + 1 : 1;
             }
         }
     }
